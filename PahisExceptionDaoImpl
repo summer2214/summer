@@ -1,0 +1,260 @@
+package com.paic.pahis.dao.impl;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.paic.pahis.dao.PahisExceptionDao;
+import com.paic.pahis.entity.PahisException;
+import com.paic.pahis.utils.DBUtil;
+
+public class PahisExceptionDaoImpl implements PahisExceptionDao {
+	private Connection conn = null;
+	private PreparedStatement pstmt = null;
+	private ResultSet rst = null;
+	
+	@Override
+	public PahisException findByCaseHistoryId(Integer caseHistoryId) {
+		PahisException exceptionCase = null;
+		try{
+			conn = DBUtil.getConnection();
+			String sql = "select * from PAHIS_EXCEPTION where CASE_HISTORY_ID = ?";
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, caseHistoryId);
+			rst = pstmt.executeQuery();
+			if(rst.next()){
+				exceptionCase = new PahisException();
+				exceptionCase.setExceptionId(rst.getInt("EXCEPTION_ID"));
+				exceptionCase.setCaseHistoryId(rst.getInt("CASE_HISTORY_ID"));
+				exceptionCase.setExceptionCause(rst.getString("EXCEPTION_CAUSE"));
+				exceptionCase.setCreateUserId(rst.getInt("CREATE_USER_ID"));
+				exceptionCase.setDealUserId(rst.getInt("DEAL_USER_ID"));
+				exceptionCase.setIsFinish(rst.getString("IS_FINISH"));
+				exceptionCase.setDeslResult(rst.getString("DESL_RESULT"));
+				String exceptionCreateTime = new SimpleDateFormat("yyyy-MM-dd").format(rst.getDate("EXCEPTION_CREATE_TIME"));
+				exceptionCase.setExceptionCreateTime(exceptionCreateTime);
+			}
+		}catch (Exception e) {
+			e.printStackTrace();
+		}finally {
+			DBUtil.releaseDB(rst, pstmt, conn);
+		}
+		return exceptionCase;
+	}
+
+	@Override
+	public List<PahisException> findTotalException() {
+		List<PahisException>  exceptionCases = new ArrayList<PahisException>();
+		try{
+			conn = DBUtil.getConnection();
+			String sql = "select * from PAHIS_EXCEPTION";
+			pstmt = conn.prepareStatement(sql);
+			rst = pstmt.executeQuery();
+			while(rst.next()){
+				PahisException exceptionCase = new PahisException();
+				exceptionCase.setExceptionId(rst.getInt("EXCEPTION_ID"));
+				exceptionCase.setCaseHistoryId(rst.getInt("CASE_HISTORY_ID"));
+				exceptionCase.setExceptionCause(rst.getString("EXCEPTION_CAUSE"));
+				exceptionCase.setCreateUserId(rst.getInt("CREATE_USER_ID"));
+				exceptionCase.setDealUserId(rst.getInt("DEAL_USER_ID"));
+				exceptionCase.setIsFinish(rst.getString("IS_FINISH"));
+				exceptionCase.setDeslResult(rst.getString("DESL_RESULT"));
+				String exceptionCreateTime = new SimpleDateFormat("yyyy年MM月dd日").format(rst.getDate("EXCEPTION_CREATE_TIME"));
+				exceptionCase.setExceptionCreateTime(exceptionCreateTime);
+				exceptionCases.add(exceptionCase);
+			}
+		}catch (Exception e) {
+			e.printStackTrace();
+		}finally {
+			DBUtil.releaseDB(rst, pstmt, conn);
+		}
+		return exceptionCases;
+	}
+
+	@Override
+	public int findTotalNum() {
+		int totalNum = 0;
+		try{
+			conn = DBUtil.getConnection();
+			String sql = "select * from PAHIS_EXCEPTION where CASE_HISTORY_ID = ?";
+			pstmt = conn.prepareStatement(sql);
+			rst = pstmt.executeQuery();
+			if(rst.next()){
+				totalNum = rst.getInt(1);
+			}
+			
+		}catch (Exception e) {
+			e.printStackTrace();
+		}finally {
+			DBUtil.releaseDB(rst, pstmt, conn);
+		}
+		return totalNum;
+	}
+
+	@Override
+	public List<PahisException> findExceptionByPage(int pageNum, int pageSize) {
+		List<PahisException>  exceptionCases = new ArrayList<PahisException>();
+		try{
+			conn = DBUtil.getConnection();
+			String sql = "(select a.*,rownum r from (select * from PAHIS_EXCEPTION) a where rownum<=?) where r>=?";
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, pageNum*pageSize);
+			pstmt.setInt(2,(pageNum-1)* pageSize+1);
+			rst = pstmt.executeQuery();
+			while(rst.next()){
+				PahisException exceptionCase = new PahisException();
+				exceptionCase.setExceptionId(rst.getInt("EXCEPTION_ID"));
+				exceptionCase.setCaseHistoryId(rst.getInt("CASE_HISTORY_ID"));
+				exceptionCase.setExceptionCause(rst.getString("EXCEPTION_CAUSE"));
+				exceptionCase.setCreateUserId(rst.getInt("CREATE_USER_ID"));
+				exceptionCase.setDealUserId(rst.getInt("DEAL_USER_ID"));
+				exceptionCase.setIsFinish(rst.getString("IS_FINISH"));
+				exceptionCase.setDeslResult(rst.getString("DESL_RESULT"));
+				String exceptionCreateTime = new SimpleDateFormat("yyyy年MM月dd日").format(rst.getDate("EXCEPTION_CREATE_TIME"));
+				exceptionCase.setExceptionCreateTime(exceptionCreateTime);
+				exceptionCases.add(exceptionCase);
+			}
+		}catch (Exception e) {
+			e.printStackTrace();
+		}finally {
+			DBUtil.releaseDB(rst, pstmt, conn);
+		}
+		return exceptionCases;
+	}
+
+	@Override
+	public List<PahisException> findExceptionByIsFinish(String isFinish,int pageNum, int pageSize) {
+		List<PahisException>  exceptionCases = new ArrayList<PahisException>();
+		try{
+			conn = DBUtil.getConnection();
+			String sql = "(select a.*,rownum r from (select * from PAHIS_EXCEPTION where IS_FINISH=?) a where rownum<=?) where r>=?";
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1,isFinish);
+			pstmt.setInt(2, pageNum*pageSize);
+			pstmt.setInt(3,(pageNum-1)* pageSize+1);
+			rst = pstmt.executeQuery();
+			while(rst.next()){
+				PahisException exceptionCase = new PahisException();
+				exceptionCase.setExceptionId(rst.getInt("EXCEPTION_ID"));
+				exceptionCase.setCaseHistoryId(rst.getInt("CASE_HISTORY_ID"));
+				exceptionCase.setExceptionCause(rst.getString("EXCEPTION_CAUSE"));
+				exceptionCase.setCreateUserId(rst.getInt("CREATE_USER_ID"));
+				exceptionCase.setDealUserId(rst.getInt("DEAL_USER_ID"));
+				exceptionCase.setIsFinish(rst.getString("IS_FINISH"));
+				exceptionCase.setDeslResult(rst.getString("DESL_RESULT"));
+				String exceptionCreateTime = new SimpleDateFormat("yyyy年MM月dd日").format(rst.getDate("EXCEPTION_CREATE_TIME"));
+				exceptionCase.setExceptionCreateTime(exceptionCreateTime);
+				exceptionCases.add(exceptionCase);
+			}
+		}catch (Exception e) {
+			e.printStackTrace();
+		}finally {
+			DBUtil.releaseDB(rst, pstmt, conn);
+		}
+		return exceptionCases;
+	}
+
+	@Override
+	public List<PahisException> findExceptionByCreateTime(String startTime,
+			String endTime,int pageNum, int pageSize) {
+		List<PahisException>  exceptionCases = new ArrayList<PahisException>();
+		try{
+			conn = DBUtil.getConnection();
+			String sql = "(select a.*,rownum r from (select * from PAHIS_EXCEPTION where EXCEPTION_CREATE_TIME between to_date(?,'yyyy-MM-dd') and to_date(?,'yyyy-MM-dd')) a where rownum<=?) where r>=?";
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1,startTime);
+			pstmt.setString(2,endTime);
+			pstmt.setInt(3, pageNum*pageSize);
+			pstmt.setInt(4,(pageNum-1)* pageSize+1);
+			rst = pstmt.executeQuery();
+			while(rst.next()){
+				PahisException exceptionCase = new PahisException();
+				exceptionCase.setExceptionId(rst.getInt("EXCEPTION_ID"));
+				exceptionCase.setCaseHistoryId(rst.getInt("CASE_HISTORY_ID"));
+				exceptionCase.setExceptionCause(rst.getString("EXCEPTION_CAUSE"));
+				exceptionCase.setCreateUserId(rst.getInt("CREATE_USER_ID"));
+				exceptionCase.setDealUserId(rst.getInt("DEAL_USER_ID"));
+				exceptionCase.setIsFinish(rst.getString("IS_FINISH"));
+				exceptionCase.setDeslResult(rst.getString("DESL_RESULT"));
+				String exceptionCreateTime = new SimpleDateFormat("yyyy年MM月dd日").format(rst.getDate("EXCEPTION_CREATE_TIME"));
+				exceptionCase.setExceptionCreateTime(exceptionCreateTime);
+				exceptionCases.add(exceptionCase);
+			}
+		}catch (Exception e) {
+			e.printStackTrace();
+		}finally {
+			DBUtil.releaseDB(rst, pstmt, conn);
+		}
+		return exceptionCases;
+	}
+
+	@Override
+	public int addPahisException(PahisException exceptionCase) {
+		int flag = 0;
+		try{
+			conn = DBUtil.getConnection();
+			String sql = "insert into PAHIS_EXCEPTION values(PAHIS_SEQ_EXCEPTION.Nextval,?,?,?,?,?,?,sysdate())";
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1,exceptionCase.getCaseHistoryId());
+			pstmt.setString(2,exceptionCase.getExceptionCause());
+			pstmt.setInt(3,exceptionCase.getCreateUserId());
+			pstmt.setInt(4,exceptionCase.getDealUserId());
+			pstmt.setString(5,exceptionCase.getIsFinish());
+			pstmt.setString(6,exceptionCase.getDeslResult());
+			flag = pstmt.executeUpdate();
+			
+		}catch (Exception e) {
+			e.printStackTrace();
+		}finally {
+			DBUtil.releaseDB(rst, pstmt, conn);
+		}
+		return flag;
+	}
+
+	@Override
+	public int deletePahisException(int exceptionId) {
+
+		int flag = 0;
+		try{
+			conn = DBUtil.getConnection();
+			String sql = "delete from PAHIS_EXCEPTION where EXCEPTION_ID= ?";
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1,exceptionId);
+			flag = pstmt.executeUpdate();
+			
+		}catch (Exception e) {
+			e.printStackTrace();
+		}finally {
+			DBUtil.releaseDB(rst, pstmt, conn);
+		}
+		return flag;
+	}
+
+	@Override
+	public int modifyPahisException(PahisException exceptionCase) {
+		int flag = 0;
+		try{
+			conn = DBUtil.getConnection();
+			String sql = "insert into PAHIS_EXCEPTION values(?,?,?,?,?,?)";
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1,exceptionCase.getCaseHistoryId());
+			pstmt.setString(2,exceptionCase.getExceptionCause());
+			pstmt.setInt(3,exceptionCase.getCreateUserId());
+			pstmt.setInt(4,exceptionCase.getDealUserId());
+			pstmt.setString(5,exceptionCase.getIsFinish());
+			pstmt.setString(6,exceptionCase.getDeslResult());
+			flag = pstmt.executeUpdate();
+			
+		}catch (Exception e) {
+			e.printStackTrace();
+		}finally {
+			DBUtil.releaseDB(rst, pstmt, conn);
+		}
+		return flag;
+			
+	}
+
+}
